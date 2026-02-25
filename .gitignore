@@ -8,6 +8,7 @@
 token.json
 credentials.json
 emails.csv
+*.csv
 
 # Ignore common IDE and editor files
 __pycache__/
