@@ -1,8 +1,15 @@
+# Virtual environment
 .venv/
+
+# Environment variables file
 .env
+
+# Account credentials and token files
 token.json
 credentials.json
+emails.csv
+
+# Ignore common IDE and editor files
 __pycache__/
 .vscode/
-emails.csv
 *.pyc
