@@ -23,7 +23,8 @@ class GmailService:
     def __init__(self):
         self.creds = None
         self.service = None
-
+        self.authenticate()
+        
     def authenticate(self):
         """
         Handles OAuth2 authentication and token management.
@@ -62,9 +63,25 @@ class GmailService:
         """
         Fetches a list of messages from the user's account.
         """
+        if not self.service:
+            raise Exception("Gmail service not initialized. Call authenticate() first.")
+        
         try:
             logging.info(f"Fetching last {max_results} messages...")
-            results = self.service.users().messages().list(userId='me', maxResults=max_results).execute()
+            
+            query = (
+    '('
+    'subject:("application for" OR "thank you for applying" OR '
+    '"application received" OR "interview" OR "assessment" OR '
+    '"offer" OR "regarding your application")'
+    ')'
+    ' AND '
+    '('
+    'from:(careers OR hr OR recruitment OR gov OR talent OR hiring)'
+    ')'
+    ' -subject:("job alert" OR "job alerts" OR "recommended jobs" OR "linkedin news")'
+)
+            results = self.service.users().messages().list(userId='me', maxResults=max_results,q= query).execute()
             return results.get('messages', [])
         except HttpError as error:
             logging.error(f"An HTTP error occurred: {error}")
@@ -74,6 +91,9 @@ class GmailService:
         """
         Retrieves metadata for a specific message ID.
         """
+        if not self.service:
+            raise Exception("Gmail service not initialized.")
+        
         try:
             msg = self.service.users().messages().get(
                 userId='me',
@@ -129,7 +149,7 @@ def main():
     
     try:
         gmail_app.authenticate()
-        messages = gmail_app.get_emails(max_results=50)
+        messages = gmail_app.get_emails(max_results=10)
         
         if not messages:
             logging.info("No messages found.")
